@@ -253,6 +253,8 @@ Dragdealer.prototype = {
     this.dragging = false;
     this.tapping = false;
 
+    this.scale = 1;
+
     this.reflow();
     if (this.options.disabled) {
       this.disable();
@@ -683,6 +685,7 @@ Dragdealer.prototype = {
       if (this.options.vertical) {
         transform += ' translateY(' + this.offset.current[1] + 'px)';
       }
+      transform += ' scale(' + this.scale + ')';
       this.handle.style[StylePrefix.transform] = transform;
       return;
     }
@@ -784,6 +787,15 @@ Dragdealer.prototype = {
   draggingOnDisabledAxis: function() {
     return (!this.options.horizontal && Cursor.xDiff > Cursor.yDiff) ||
            (!this.options.vertical && Cursor.yDiff > Cursor.xDiff);
+  },
+  zoomIn: function(level) {
+    this.scale = parseInt(level, 10) || 2;
+    this.renderHandlePosition()
+
+  },
+  zoomOut: function(level) {
+    this.scale = parseInt(level, 10) || 1;
+    this.renderHandlePosition()
   }
 };
 

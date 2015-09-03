@@ -209,6 +209,7 @@ var Dragdealer = function(wrapper, options) {
   }
   this.init();
   this.bindEventListeners();
+  console.log('dragdealer', this);
 };
 
 
@@ -314,6 +315,7 @@ Dragdealer.prototype = {
   calculateBounds: function() {
     // Apply top/bottom/left and right padding options to wrapper extremities
     // when calculating its bounds
+
     var bounds = {
       top: this.options.top || 0,
       bottom: -(this.options.bottom || 0) + this.wrapper.offsetHeight,
@@ -325,6 +327,7 @@ Dragdealer.prototype = {
     // height of the wrapper, minus the width and height of the handle
     bounds.availWidth = (bounds.right - bounds.left) - this.handle.offsetWidth;
     bounds.availHeight = (bounds.bottom - bounds.top) - this.handle.offsetHeight;
+    console.log('calculateBounds', bounds);
     return bounds;
   },
   calculateValuePrecision: function() {
@@ -489,6 +492,43 @@ Dragdealer.prototype = {
     this.setWrapperOffset();
     this.bounds = this.calculateBounds();
     this.valuePrecision = this.calculateValuePrecision();
+    console.log('this.valuePrecision', this.valuePrecision);
+    this.updateOffsetFromValue();
+    console.log('reflow!!!!', this.bounds);
+  },
+  forceReflow: function(image) {
+    this.setWrapperOffset();
+
+    // 1920 x 1080
+    // (1080 - 500) / 2 =
+    // 580 / 2 = 290
+
+    // (1920 - 922) / 2
+    // 998 / 2 = 499
+
+    console.log('forceReflow', image);
+    this.options.top = 290;
+    this.options.bottom = 290; // seems right by coincidence or other
+    this.options.left = 290;
+    this.options.right = 290;
+
+    this.bounds.top         = this.options.top || 0;
+    this.bounds.bottom      = -(this.options.bottom || 0) + this.wrapper.offsetHeight;
+    this.bounds.left        = this.options.left || 0;
+    this.bounds.right       = -(this.options.right || 0) + this.wrapper.offsetWidth;
+    this.bounds.availWidth  = -1260;
+    this.bounds.availHeight = -290;
+
+    console.group('forceReflow');
+    console.log('offsetWidth', this.wrapper.offsetWidth);
+    console.log('this.bounds.availWidth', this.bounds.availWidth);
+
+    console.log('offsetHeight', this.wrapper.offsetHeight);
+    console.log('this.bounds.availHeight', this.bounds.availHeight);
+    console.groupEnd('forceReflow');
+
+    // this.valuePrecision = this.calculateValuePrecision();
+    // console.log('this.valuePrecision', this.valuePrecision);
     this.updateOffsetFromValue();
   },
   getStep: function() {
@@ -663,6 +703,8 @@ Dragdealer.prototype = {
     return true;
   },
   updateOffsetFromValue: function() {
+    // console.log('updateOffsetFromValue');
+
     if (!this.options.snap) {
       this.offset.current = this.getOffsetsByRatios(this.value.current);
     } else {
@@ -785,8 +827,10 @@ Dragdealer.prototype = {
     return [a[0], a[1]];
   },
   draggingOnDisabledAxis: function() {
-    return (!this.options.horizontal && Cursor.xDiff > Cursor.yDiff) ||
-           (!this.options.vertical && Cursor.yDiff > Cursor.xDiff);
+    var first = (!this.options.horizontal && Cursor.xDiff > Cursor.yDiff);
+    var second = (!this.options.vertical && Cursor.yDiff > Cursor.xDiff);
+    console.log('draggingOnDisabledAxis', first, second);
+    return first || second;
   },
   zoomIn: function(level) {
     this.scale = parseInt(level, 10) || 2;

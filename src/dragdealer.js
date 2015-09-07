@@ -311,6 +311,7 @@ Dragdealer.prototype = {
   },
   setWrapperOffset: function() {
     this.offset.wrapper = Position.get(this.wrapper);
+    console.log('setWrapperOffset', this.offset.wrapper);
   },
   calculateBounds: function() {
     // Apply top/bottom/left and right padding options to wrapper extremities
@@ -339,10 +340,12 @@ Dragdealer.prototype = {
     // objects from one of the callbacks
     var xPrecision = this.options.xPrecision || Math.abs(this.bounds.availWidth),
         yPrecision = this.options.yPrecision || Math.abs(this.bounds.availHeight);
-    return [
+    var retVal = [
       xPrecision ? 1 / xPrecision : 0,
       yPrecision ? 1 / yPrecision : 0
     ];
+    console.log('calculateValuePrecision', retVal);
+    return retVal;
   },
   bindMethods: function() {
     if (typeof(this.options.customRequestAnimationFrame) === 'function') {
@@ -489,12 +492,13 @@ Dragdealer.prototype = {
     this.handle.className += ' disabled';
   },
   reflow: function() {
+    console.group('reflow');
     this.setWrapperOffset();
     this.bounds = this.calculateBounds();
     this.valuePrecision = this.calculateValuePrecision();
     console.log('this.valuePrecision', this.valuePrecision);
     this.updateOffsetFromValue();
-    console.log('reflow!!!!', this.bounds);
+    console.groupEnd('reflow');
   },
   forceReflow: function(image) {
     this.setWrapperOffset();
@@ -703,18 +707,23 @@ Dragdealer.prototype = {
     return true;
   },
   updateOffsetFromValue: function() {
-    // console.log('updateOffsetFromValue');
 
     if (!this.options.snap) {
+      console.log('updateOffsetFromValue no snap');
       this.offset.current = this.getOffsetsByRatios(this.value.current);
     } else {
+      console.log('updateOffsetFromValue snap');
       this.offset.current = this.getOffsetsByRatios(
         this.getClosestSteps(this.value.current)
       );
     }
     if (!this.groupCompare(this.offset.current, this.offset.prev)) {
+      console.log('updateOffsetFromValue !groupCompare');
       this.renderHandlePosition();
       this.groupCopy(this.offset.prev, this.offset.current);
+    }
+    else {
+      console.log('updateOffsetFromValue =groupCompare');
     }
   },
   renderHandlePosition: function() {
@@ -732,6 +741,7 @@ Dragdealer.prototype = {
       return;
     }
 
+    // if CSS3 transforms are not supported:
     if (this.options.horizontal) {
       this.handle.style.left = this.offset.current[0] + 'px';
     }
